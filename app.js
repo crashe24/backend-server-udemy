@@ -16,16 +16,21 @@ var app = express();
 // body parser
 
 // parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse application/json
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 
 
 // importar rutas
 var appRoutes = require('./routes/app');
 var usuarioRoutes = require('./routes/usuario');
+var hospitalRoutes = require('./routes/hospital');
+var medicoRoutes = require('./routes/medico');
 var loginRoutes = require('./routes/login');
+var busquedaRoutes = require('./routes/busqueda');
+var uploadRoutes = require('./routes/upload');
+var imagenesRoutes = require('./routes/imagenes');
 
 // conexion a la bdd 
 mongoose.connection.openUri('mongodb://localhost:27017/hospitalDB', (err, resp) => {
@@ -34,6 +39,18 @@ mongoose.connection.openUri('mongodb://localhost:27017/hospitalDB', (err, resp) 
 
     console.log('Base de datos:  ,\x1b[32m%s\x1b[0m', 'online');
 });
+
+
+//IMPORTANTE Server index SE COMENTA PARA VER COMO SE USA
+// posibilidad de ver los archivvos subidos
+// npm install serve-index
+// http://localhost:3000/uploads/
+/*
+var serveIndex = require('serve-index');
+app.use(express.static(__dirname + '/'))
+app.use('/uploads', serveIndex(__dirname + '/uploads'));
+*/
+
 
 
 // Rutas 
@@ -51,8 +68,14 @@ app.get('/', (request, response, next) => {
 
 // midleware
 app.use('/usuario', usuarioRoutes);
+app.use('/hospital', hospitalRoutes);
+app.use('/medico', medicoRoutes);
 app.use('/login', loginRoutes);
+app.use('/busqueda', busquedaRoutes);
+app.use('/img', imagenesRoutes);
+app.use('/upload', uploadRoutes);
 
+// siempre debe ser la ultima ruta / caso contrario no funciona
 app.use('/', appRoutes);
 
 

@@ -3,6 +3,7 @@ var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 
 
+
 var mdAutenticacion = require('../middleware/autenticacion');
 
 //var SEED = require('../config/config').SEED;
@@ -18,25 +19,72 @@ var Usuario = require('../models/usuario');
 // Obtener todos los usuarios
 // ========================================
 
-app.get('/', (request, response, next) => {
+// con el pluggin 
+/*
+app.get('/', (req, res, next) => {
+    //para obtener los valores que quiero obtener desde 
+    var desde = req.query.desde || 0; // debe ser un numero caso contrario no funciona
+    // se hardcodea 
+    desde = Number(desde);
+
+    Usuario.paginate({}, { page: 1, limit: 5 }, ('nombre email img role'),
+
+        (err, usuarios) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando usuarios',
+                    errors: err
+                });
+            }
+            res.status(200).json({
+                ok: true,
+                usuarios: usuarios
+            });
+
+
+        });
+});*/
+
+app.get('/', (req, res, next) => {
+    //para obtener los valores que quiero obtener desde 
+    var desde = req.query.desde || 0; // debe ser un numero caso contrario no funciona
+    // se hardcodea 
+    desde = Number(desde);
 
     Usuario.find({}, 'nombre email img role')
+        .skip(desde) // funcion para que me salte desde y me obtenga 
+        .limit(5) // limito a cinco los resultados
         .exec(
             (err, usuarios) => {
                 if (err) {
-                    return response.status(500).json({
+                    return res.status(500).json({
                         ok: false,
                         mensaje: 'Error cargando usuarios',
                         errors: err
                     });
                 }
-                response.status(200).json({
-                    ok: true,
-                    usuarios: usuarios
+
+                //para  contar el total de los registros 
+                Usuario.count({}, (err, conteo) => {
+                    if (err) {
+                        return res.status(500).json({
+                            ok: false,
+                            mensaje: 'Error contando usuarios',
+                            errors: err
+                        });
+                    }
+                    res.status(200).json({
+                        ok: true,
+                        usuarios: usuarios,
+                        total: conteo
+                    });
                 });
+
             });
 
 });
+
 // escuchar petisiones al express
 
 
@@ -70,7 +118,7 @@ app.use('/', (req, res, next) => {
 /*======================ACTUALIZAR UN REGISTRO DE USUARIO ==============================*/
 
 // =======================================
-// Crear un nuevo usuario
+// Actualizar un nuevo usuario
 // ========================================
 
 app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
